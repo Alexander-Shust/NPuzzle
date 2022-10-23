@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using UnityEngine;
 
 public class PuzzleManager : MonoBehaviour
@@ -26,16 +27,32 @@ public class PuzzleManager : MonoBehaviour
         var boardLocalScale = _board.localScale;
         _boardWidth = boardLocalScale.x;
         _boardHeight = boardLocalScale.z;
-        var puzzle = GeneratePuzzle(_boardSize);
-        InitBoard(_boardSize, puzzle);
+        _pieces = new GameObject[_boardSize * _boardSize];
+        
+        InitBoard();
         Down();
         Right();
         Down();
         Left();
     }
 
-    public void InitBoard(int size, int[,] pieces)
+    private void ClearBoard()
     {
+        foreach (var go in _pieces)
+        {
+            if (go != null)
+            {
+                Destroy(go);
+            }
+        }
+    } 
+    
+    [UsedImplicitly]
+    public void InitBoard()
+    {
+        ClearBoard();
+        var size = _boardSize;
+        var pieces = GeneratePuzzle(size);
         _pieces = new GameObject[size * size];
         _pieceSize = (Mathf.Min(_boardWidth, _boardHeight) - _spacing * (size - 1)) / size;
         var fontSize = 36 / size;
@@ -63,7 +80,8 @@ public class PuzzleManager : MonoBehaviour
         }
     }
 
-    private void Up()
+    [UsedImplicitly]
+    public void Up()
     {
         var target = _emptyPosition - _boardSize;
         if (target < 0) return;
@@ -75,7 +93,8 @@ public class PuzzleManager : MonoBehaviour
         SwapWithEmpty(target);
     }
 
-    private void Down()
+    [UsedImplicitly]
+    public void Down()
     {
         var target = _emptyPosition + _boardSize;
         if (target >= _boardSize * _boardSize) return;
@@ -87,7 +106,8 @@ public class PuzzleManager : MonoBehaviour
         SwapWithEmpty(target);
     }
 
-    private void Left()
+    [UsedImplicitly]
+    public void Left()
     {
         if (_emptyPosition % _boardSize == 0) return;
         var target = _emptyPosition - 1;
@@ -99,7 +119,8 @@ public class PuzzleManager : MonoBehaviour
         SwapWithEmpty(target);
     }
 
-    private void Right()
+    [UsedImplicitly]
+    public void Right()
     {
         var target = _emptyPosition + 1;
         if (target % _boardSize == 0) return;
