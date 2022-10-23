@@ -30,10 +30,6 @@ public class PuzzleManager : MonoBehaviour
         _pieces = new GameObject[_boardSize * _boardSize];
         
         InitBoard();
-        Down();
-        Right();
-        Down();
-        Left();
     }
 
     private void ClearBoard()
