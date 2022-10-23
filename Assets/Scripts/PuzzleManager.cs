@@ -80,6 +80,30 @@ public class PuzzleManager : MonoBehaviour
         }
     }
 
+    private void Update()
+    {
+        if (Input.GetKeyUp(KeyCode.UpArrow))
+        {
+            Up();
+        }
+        else if (Input.GetKeyUp(KeyCode.DownArrow))
+        {
+            Down();
+        }
+        else if (Input.GetKeyUp(KeyCode.LeftArrow))
+        {
+            Left();
+        }
+        else if (Input.GetKeyUp(KeyCode.RightArrow))
+        {
+            Right();
+        }
+        else if (Input.GetKeyUp(KeyCode.Return))
+        {
+            InitBoard();
+        }
+    }
+
     [UsedImplicitly]
     public void Up()
     {
@@ -139,7 +163,7 @@ public class PuzzleManager : MonoBehaviour
         _emptyPosition = target;
     }
 
-    public int[,] GeneratePuzzle(int size)
+    private int[,] GeneratePuzzle(int size)
     {
         var puzzle = new int[size, size];
         for (var i = 0; i < size * size; ++i)
