@@ -610,6 +610,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 691f8bf79aec17c4fa75bee6ff4ec6db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _puzzleType: 1
   _board: {fileID: 1532866129}
   _piecePrefab: {fileID: 4618037244106645904, guid: a9538daa7a12aaa47a94f622ce5f358f, type: 3}
   _boardSize: 4

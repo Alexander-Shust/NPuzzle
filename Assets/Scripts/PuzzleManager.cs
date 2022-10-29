@@ -1,8 +1,12 @@
+using System;
 using JetBrains.Annotations;
 using UnityEngine;
 
 public class PuzzleManager : MonoBehaviour
 {
+    [SerializeField]
+    private PuzzleType _puzzleType;
+    
     [SerializeField]
     private Transform _board;
 
@@ -21,6 +25,7 @@ public class PuzzleManager : MonoBehaviour
 
     private GameObject[] _pieces;
     private int _emptyPosition;
+    private int[,] _goal;
 
     private void Start()
     {
@@ -48,7 +53,12 @@ public class PuzzleManager : MonoBehaviour
     {
         ClearBoard();
         var size = _boardSize;
-        var pieces = PuzzleGenerator.Generate(size);
+        var pieces = PuzzleGenerator.Generate(size, _puzzleType);
+        _goal = _puzzleType switch
+        {
+            PuzzleType.Snail => PuzzleGenerator.GenerateSnailPosition(size),
+            _ => PuzzleGenerator.GenerateSovietPosition(size)
+        };
         _pieces = new GameObject[size * size];
         _pieceSize = (Mathf.Min(_boardWidth, _boardHeight) - _spacing * (size - 1)) / size;
         var fontSize = 36 / size;
@@ -157,5 +167,27 @@ public class PuzzleManager : MonoBehaviour
         _pieces[_emptyPosition] = _pieces[target];
         _pieces[target] = null;
         _emptyPosition = target;
+        if (IsVictory())
+        {
+            Debug.LogError("Victory");
+        }
+    }
+
+    private bool IsVictory()
+    {
+        for (var i = 0; i < _boardSize * _boardSize; ++i)
+        {
+            var x = i / _boardSize;
+            var y = i % _boardSize;
+            if (_pieces[i] == null)
+            {
+                if (_goal[x, y] == 0) continue;
+                return false;
+            }
+            var piece = _pieces[i].GetComponent<PuzzlePiece>();
+            
+            if (piece.Number != _goal[x, y]) return false;
+        }
+        return true;
     }
 }
