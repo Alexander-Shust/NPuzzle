@@ -48,7 +48,7 @@ public class PuzzleManager : MonoBehaviour
     {
         ClearBoard();
         var size = _boardSize;
-        var pieces = GeneratePuzzle(size);
+        var pieces = PuzzleGenerator.Generate(size);
         _pieces = new GameObject[size * size];
         _pieceSize = (Mathf.Min(_boardWidth, _boardHeight) - _spacing * (size - 1)) / size;
         var fontSize = 36 / size;
@@ -157,15 +157,5 @@ public class PuzzleManager : MonoBehaviour
         _pieces[_emptyPosition] = _pieces[target];
         _pieces[target] = null;
         _emptyPosition = target;
-    }
-
-    private int[,] GeneratePuzzle(int size)
-    {
-        var puzzle = new int[size, size];
-        for (var i = 0; i < size * size; ++i)
-        {
-            puzzle[i / size, i % size] = i;
-        }
-        return puzzle;
     }
 }
