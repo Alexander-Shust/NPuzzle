@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using JetBrains.Annotations;
 using UnityEngine;
 
 public class StateViewManager : MonoBehaviour
@@ -10,7 +11,19 @@ public class StateViewManager : MonoBehaviour
     private StateDisplay _targetState;
 
     private List<int[,]> _states;
-        
+
+    private int _currentIndex;
+
+    private int CurrentIndex
+    {
+        get => _currentIndex;
+        set
+        {
+            _currentIndex = value;
+            UpdateStates();
+        }
+    }
+
     private void Awake()
     {
         SetActive(false);
@@ -24,9 +37,32 @@ public class StateViewManager : MonoBehaviour
 
     public void SetStates(List<int[,]> states)
     {
+        if (states.Count < 2) return;
+
         _states = states;
-        _currentState.SetState(_states[0]);
-        _targetState.SetState(_states[states.Count - 1]);
+        CurrentIndex = 0;
+    }
+
+    private void UpdateStates()
+    {
+        _currentState.SetState(_states[CurrentIndex]);
+        _targetState.SetState(_states[CurrentIndex + 1]);
+    }
+
+    [UsedImplicitly]
+    public void NextState()
+    {
+        if (_states.Count <= CurrentIndex + 2) return;
+
+        ++CurrentIndex;
+    }
+
+    [UsedImplicitly]
+    public void PreviousState()
+    {
+        if (CurrentIndex <= 0) return;
+
+        --CurrentIndex;
     }
 
     public void SetSize(int size)

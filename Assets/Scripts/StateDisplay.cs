@@ -35,6 +35,7 @@ public class StateDisplay : MonoBehaviour
             var position = new Vector2(i % _size * numberWidth, rect.height - i / size * numberHeight);
             var numberGo = Instantiate(_numberPrefab, position, Quaternion.identity, _panel);
             var numberItem = numberGo.GetComponent<NumberItem>();
+            numberItem.SetSize(numberWidth, numberHeight);
             _numbers.Add(numberItem);
         }
     }

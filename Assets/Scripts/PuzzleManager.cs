@@ -174,11 +174,7 @@ public class PuzzleManager : MonoBehaviour
         }
         var states = Solver.Solve(_boardSize, pieces, _goal);
         Debug.LogError($"Solved in {states.Count - 1} moves");
-        var finalState = states[states.Count - 1];
-        for (var i = 0; i < _boardSize * _boardSize; ++i)
-        {
-            Debug.LogError(finalState[i / _boardSize, i % _boardSize]);
-        }
+        
         _board.gameObject.SetActive(false);
         _buttons.gameObject.SetActive(false);
         _solveButton.gameObject.SetActive(false);
@@ -270,7 +266,6 @@ public class PuzzleManager : MonoBehaviour
         if (IsVictory())
         {
             Debug.LogError("Victory");
-            InitBoard();
         }
     }
 
