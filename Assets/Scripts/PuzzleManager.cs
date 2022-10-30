@@ -133,7 +133,16 @@ public class PuzzleManager : MonoBehaviour
             }
         }
 
-        if (!IsSolvable(pieces))
+        var isStraightSolvable = IsSolvable((int[,]) pieces.Clone());
+        var isSolvable = isStraightSolvable && _puzzleType == PuzzleType.Soviet;
+        isSolvable |= isStraightSolvable && _puzzleType == PuzzleType.Snail && _boardSize % 2 == 0;
+        isSolvable |= !isStraightSolvable && _puzzleType == PuzzleType.Snail && _boardSize % 2 == 1;
+        if (isSolvable)
+        {
+            var moves = Solver.Solve(_boardSize, pieces, _goal);
+            Debug.LogError($"Solved in {moves.Count} moves");
+        }
+        else
         {
             Debug.LogError("Unsolvable");
         }
