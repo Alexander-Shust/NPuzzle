@@ -13,6 +13,9 @@ public class PuzzleManager : MonoBehaviour
     private Transform _board;
 
     [SerializeField]
+    private StateViewManager _viewManager;
+
+    [SerializeField]
     private GameObject _piecePrefab;
     
     [SerializeField]
@@ -139,8 +142,14 @@ public class PuzzleManager : MonoBehaviour
         isSolvable |= !isStraightSolvable && _puzzleType == PuzzleType.Snail && _boardSize % 2 == 1;
         if (isSolvable)
         {
-            var moves = Solver.Solve(_boardSize, pieces, _goal);
-            Debug.LogError($"Solved in {moves.Count} moves");
+            var states = Solver.Solve(_boardSize, pieces, _goal);
+            Debug.LogError($"Solved in {states.Count - 1} moves");
+            var finalState = states[states.Count - 1];
+            for (var i = 0; i < _boardSize * _boardSize; ++i)
+            {
+                Debug.LogError(finalState[i / _boardSize, i % _boardSize]);
+            }
+            _board.gameObject.SetActive(false);
         }
         else
         {
