@@ -4,7 +4,7 @@ using Random = UnityEngine.Random;
 
 public static class PuzzleGenerator
 {
-    public static int[,] Generate(int size, PuzzleType type = PuzzleType.Soviet, bool solvable = true)
+    public static int[,] Generate(int size, PuzzleType type = PuzzleType.Soviet, Solvable solvable = Solvable.Yes)
     {
         var start = type switch
         {
@@ -43,7 +43,12 @@ public static class PuzzleGenerator
             zeroY = targetY;
         }
 
-        if (!solvable)
+        var isSolvable = solvable == Solvable.Yes;
+        if (solvable == Solvable.Unknown)
+        {
+            isSolvable = Random.Range(0, 2) == 1;
+        }
+        if (!isSolvable)
         {
             if (start[0, 0] == 0 || start[0, 1] == 0)
             {

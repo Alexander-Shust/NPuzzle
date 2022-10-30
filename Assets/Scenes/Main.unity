@@ -613,7 +613,7 @@ MonoBehaviour:
   _puzzleType: 1
   _board: {fileID: 1532866129}
   _piecePrefab: {fileID: 4618037244106645904, guid: a9538daa7a12aaa47a94f622ce5f358f, type: 3}
-  _boardSize: 4
+  _boardSize: 2
   _spacing: 0.25
 --- !u!1 &1219284944
 GameObject:

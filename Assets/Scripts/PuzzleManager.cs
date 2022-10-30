@@ -1,4 +1,3 @@
-using System;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -6,6 +5,9 @@ public class PuzzleManager : MonoBehaviour
 {
     [SerializeField]
     private PuzzleType _puzzleType;
+
+    [SerializeField]
+    private Solvable _solvable;
     
     [SerializeField]
     private Transform _board;
@@ -37,6 +39,52 @@ public class PuzzleManager : MonoBehaviour
         InitBoard();
     }
 
+    private bool IsSolvable(int[,] pieces)
+    {
+        var zeroX = _boardSize - 1;
+        var zeroY = _boardSize - 1;
+        for (var i = 0; i < _boardSize * _boardSize; ++i)
+        {
+            if (pieces[i / _boardSize, i % _boardSize] == 0)
+            {
+                zeroX = i / _boardSize;
+                zeroY = i % _boardSize;
+                break;
+            }
+        }
+
+        for (var i = zeroX; i < _boardSize - 1; ++i)
+        {
+            (pieces[i, zeroY], pieces[i + 1, zeroY]) = (pieces[i + 1, zeroY], pieces[i, zeroY]);
+        }
+
+        zeroX = _boardSize - 1;
+
+        for (var i = zeroY; i < _boardSize - 1; ++i)
+        {
+            (pieces[zeroX, i], pieces[zeroX, i + 1]) = (pieces[zeroX, i + 1], pieces[zeroX, i]);
+        }
+
+        var errors = 0;
+        for (var i = 1; i < _boardSize * _boardSize; ++i)
+        {
+            for (var j = 0; j < _boardSize * _boardSize; ++j)
+            {
+                var x = j / _boardSize;
+                var y = j % _boardSize;
+                if (pieces[x, y] == i) break;
+                if (pieces[x, y] > i)
+                {
+                    ++errors;
+                }
+            }
+        }
+
+        return errors % 2 == 0;
+    }
+    
+    
+
     private void ClearBoard()
     {
         foreach (var go in _pieces)
@@ -53,7 +101,7 @@ public class PuzzleManager : MonoBehaviour
     {
         ClearBoard();
         var size = _boardSize;
-        var pieces = PuzzleGenerator.Generate(size, _puzzleType);
+        var pieces = PuzzleGenerator.Generate(size, _puzzleType, _solvable);
         _goal = _puzzleType switch
         {
             PuzzleType.Snail => PuzzleGenerator.GenerateSnailPosition(size),
@@ -83,6 +131,11 @@ public class PuzzleManager : MonoBehaviour
                 piece.SetNumber(pieces[i, j]);
                 piece.SetFontSize(fontSize);
             }
+        }
+
+        if (!IsSolvable(pieces))
+        {
+            Debug.LogError("Unsolvable");
         }
     }
 
@@ -170,6 +223,7 @@ public class PuzzleManager : MonoBehaviour
         if (IsVictory())
         {
             Debug.LogError("Victory");
+            InitBoard();
         }
     }
 
