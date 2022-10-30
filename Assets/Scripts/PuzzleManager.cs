@@ -1,5 +1,6 @@
 using JetBrains.Annotations;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PuzzleManager : MonoBehaviour
 {
@@ -11,6 +12,12 @@ public class PuzzleManager : MonoBehaviour
     
     [SerializeField]
     private Transform _board;
+
+    [SerializeField]
+    private Button _solveButton;
+
+    [SerializeField]
+    private Transform _buttons;
 
     [SerializeField]
     private StateViewManager _viewManager;
@@ -32,14 +39,14 @@ public class PuzzleManager : MonoBehaviour
     private int _emptyPosition;
     private int[,] _goal;
 
-    private void Start()
+    private void Awake()
     {
         var boardLocalScale = _board.localScale;
         _boardWidth = boardLocalScale.x;
         _boardHeight = boardLocalScale.z;
         _pieces = new GameObject[_boardSize * _boardSize];
-        
-        InitBoard();
+        _solveButton.gameObject.SetActive(false);
+        _viewManager.SetSize(_boardSize);
     }
 
     private bool IsSolvable(int[,] pieces)
@@ -97,6 +104,10 @@ public class PuzzleManager : MonoBehaviour
                 Destroy(go);
             }
         }
+        _buttons.gameObject.SetActive(true);
+        _board.gameObject.SetActive(true);
+        _solveButton.gameObject.SetActive(false);
+        _viewManager.SetActive(false);
     } 
     
     [UsedImplicitly]
@@ -142,19 +153,37 @@ public class PuzzleManager : MonoBehaviour
         isSolvable |= !isStraightSolvable && _puzzleType == PuzzleType.Snail && _boardSize % 2 == 1;
         if (isSolvable)
         {
-            var states = Solver.Solve(_boardSize, pieces, _goal);
-            Debug.LogError($"Solved in {states.Count - 1} moves");
-            var finalState = states[states.Count - 1];
-            for (var i = 0; i < _boardSize * _boardSize; ++i)
-            {
-                Debug.LogError(finalState[i / _boardSize, i % _boardSize]);
-            }
-            _board.gameObject.SetActive(false);
+            _solveButton.gameObject.SetActive(true);
         }
         else
         {
             Debug.LogError("Unsolvable");
         }
+    }
+
+    [UsedImplicitly]
+    public void Solve()
+    {
+        var pieces = new int[_boardSize, _boardSize];
+        for (var i = 0; i < _boardSize * _boardSize; ++i)
+        {
+            var x = i / _boardSize;
+            var y = i % _boardSize;
+            var piece = _pieces[i];
+            pieces[x, y] = piece == null ? 0 : piece.GetComponent<PuzzlePiece>().Number;
+        }
+        var states = Solver.Solve(_boardSize, pieces, _goal);
+        Debug.LogError($"Solved in {states.Count - 1} moves");
+        var finalState = states[states.Count - 1];
+        for (var i = 0; i < _boardSize * _boardSize; ++i)
+        {
+            Debug.LogError(finalState[i / _boardSize, i % _boardSize]);
+        }
+        _board.gameObject.SetActive(false);
+        _buttons.gameObject.SetActive(false);
+        _solveButton.gameObject.SetActive(false);
+        _viewManager.SetActive(true);
+        _viewManager.SetStates(states);
     }
 
     private void Update()
