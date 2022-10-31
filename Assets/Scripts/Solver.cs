@@ -28,15 +28,15 @@ public static class Solver
             }
         }
 
-        var iterations = 0;
+        // var iterations = 0;
         var possibleMoves = new List<Move>();
         while (!IsEqual(_puzzle, _goal))
         {
-            if (iterations++ > 1000000)
-            {
-                Debug.LogError(iterations);
-                break;
-            }
+            // if (iterations++ > 1000000)
+            // {
+            //     Debug.LogError(iterations);
+            //     break;
+            // }
             possibleMoves.Clear();
             if (zeroX > 0) possibleMoves.Add(Move.Up);
             if (zeroX < size - 1) possibleMoves.Add(Move.Down);
@@ -57,7 +57,7 @@ public static class Solver
                 if (states.Any(state => IsEqual(state, possibleState)))
                 {
                     possibleMoves.Remove(move);
-                    break;
+                    // break;
                 }
             }
             
