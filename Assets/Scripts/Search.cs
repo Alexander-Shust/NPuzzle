@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using DataStructures.PriorityQueue;
 using UnityEngine;
 
@@ -88,7 +89,8 @@ public class Search
 
     private int GetHeuristicDistance(State state)
     {
-        return ErrorCount(state);
+        // return ErrorCount(state);
+        return Manhattan(state);
     }
 
     private int ErrorCount(State state)
@@ -105,5 +107,35 @@ public class Search
             }
         }
         return count;
+    }
+
+    private int Manhattan(State state)
+    {
+        var distance = 0;
+        for (var i = 0; i < state.Size; ++i)
+        {
+            for (var j = 0; j < state.Size; ++j)
+            {
+                var current = state.Numbers[i, j];
+                if (current == 0) continue;
+
+                var isFound = false;
+                for (var i2 = 0; i2 < state.Size; ++i2)
+                {
+                    for (var j2 = 0; j2 < state.Size; ++j2)
+                    {
+                        if (_target.Numbers[i2, j2] == current)
+                        {
+                            distance += Math.Abs(i2 - i) + Math.Abs(j2 - j);
+                            isFound = true;
+                            break;
+                        }
+                    }
+
+                    if (isFound) break;
+                }
+            }
+        }
+        return distance;
     }
 }

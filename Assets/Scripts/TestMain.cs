@@ -36,10 +36,10 @@ public class TestMain : MonoBehaviour
         
         var easy4X4 = new[,] 
         {     
-            {1,2,3,0},
-            {5,6,7,4},
-            {9,10,11,8},
-            {13,14,15,12}
+            {12,1,3,4},
+            {2,13,14,5},
+            {11,10,8,6},
+            {9,15,7,0}
         };
         
         var target2X2 = new[,]
@@ -73,8 +73,7 @@ public class TestMain : MonoBehaviour
         var target4 = new State(4, target4X4, 3, 3, 0);
 
         var watch = new Stopwatch();
-        // var search = new Search(easy, target);
-        var search = new Search(start3, target3);
+        var search = new Search(easy4, target4);
                             
 
         watch.Start();
