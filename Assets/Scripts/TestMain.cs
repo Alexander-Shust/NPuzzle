@@ -73,7 +73,7 @@ public class TestMain : MonoBehaviour
         var target4 = new State(4, target4X4, 3, 3, 0);
 
         var watch = new Stopwatch();
-        var search = new Search(easy4, target4);
+        var search = new Search(start3, target3);
                             
 
         watch.Start();

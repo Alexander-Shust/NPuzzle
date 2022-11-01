@@ -89,8 +89,11 @@ public class Search
 
     private int GetHeuristicDistance(State state)
     {
-        // return ErrorCount(state);
-        return Manhattan(state);
+        var distance = 0;
+        // distance += ErrorCount(state);
+        distance += Manhattan(state);
+        distance += LineConflicts(state);
+        return distance;
     }
 
     private int ErrorCount(State state)
@@ -137,5 +140,76 @@ public class Search
             }
         }
         return distance;
+    }
+
+    private int LineConflicts(State state)
+    {
+        var distance = 0;
+        for (var i = 0; i < state.Size; ++i)
+        {
+            distance += CountRowConflicts(state.Size, state.Numbers, i);
+            distance += CountColumnConflicts(state.Size, state.Numbers, i);
+        }
+        return distance;
+    }
+
+    private int CountRowConflicts(int size, int[,] numbers, int index)
+    {
+        var count = 0;
+        var pieces = new List<int>();
+        for (var i = 0; i < size - 1; ++i)
+        {
+            if (pieces.Contains(i)) continue;
+            for (var j = i + 1; j < size; ++j)
+            {
+                if (pieces.Contains(j) || numbers[i, index] == 0 || numbers[j, index] == 0) continue;
+                var targetA = -1;
+                var targetB = -1;
+                for (var n = 0; n < size; ++n)
+                {
+                    if (_target.Numbers[n, index] == numbers[i, index]) targetA = n;
+                    else if (_target.Numbers[n, index] == numbers[j, index]) targetB = n;
+                }
+
+                if (targetA >= 0 && targetB >= 0 && (i < j && targetA > targetB || i > j && targetA < targetB))
+                {
+                    count += 2;
+                    pieces.Add(i);
+                    pieces.Add(j);
+                    break;
+                }
+            }
+        }
+        return count;
+    }
+    
+    private int CountColumnConflicts(int size, int[,] numbers, int index)
+    {
+        var count = 0;
+        var pieces = new List<int>();
+        for (var i = 0; i < size - 1; ++i)
+        {
+            if (pieces.Contains(i)) continue;
+            for (var j = i + 1; j < size; ++j)
+            {
+                if (pieces.Contains(j) || numbers[index, i] == 0 || numbers[index, j] == 0) continue;
+                var targetA = -1;
+                var targetB = -1;
+                for (var n = 0; n < size; ++n)
+                {
+                    if (_target.Numbers[index, n] == numbers[index, i]) targetA = n;
+                    else if (_target.Numbers[index, n] == numbers[index, j]) targetB = n;
+                }
+
+                if (targetA >= 0 && targetB >= 0 && (i < j && targetA > targetB || i > j && targetA < targetB))
+                {
+                    count += 2;
+                    pieces.Add(i);
+                    pieces.Add(j);
+                    break;
+                }
+            }
+        }
+        return count;
     }
 }
