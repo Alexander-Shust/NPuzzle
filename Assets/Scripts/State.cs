@@ -2,15 +2,17 @@
 {
     public int Size { get; }
     public int[,] Numbers { get; }
+    public State Previous { get; }
     public int ZeroX { get; }
     public int ZeroY { get; }
     public int Depth { get; }
     public string String { get; }
 
-    public State(int size, int[,] numbers, int zeroX, int zeroY, int depth)
+    public State(int size, int[,] numbers, int zeroX, int zeroY, int depth, State previous = null)
     {
         Size = size;
         Numbers = (int[,]) numbers.Clone();
+        Previous = previous;
         ZeroX = zeroX;
         ZeroY = zeroY;
         String = string.Empty;

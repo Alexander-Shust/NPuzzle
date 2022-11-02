@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Enums;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -9,6 +8,9 @@ public class PuzzleManager : MonoBehaviour
 {
     [SerializeField]
     private SettingsManager _settingsManager;
+
+    [SerializeField]
+    private ResultManager _resultManager;
 
     [SerializeField]
     private Transform _board;
@@ -103,6 +105,7 @@ public class PuzzleManager : MonoBehaviour
         _board.gameObject.SetActive(true);
         _solveButton.gameObject.SetActive(false);
         _viewManager.SetActive(false);
+        _resultManager.SetActive(false);
     } 
     
     [UsedImplicitly]
@@ -180,15 +183,21 @@ public class PuzzleManager : MonoBehaviour
             pieces[x, y] = piece == null ? 0 : piece.GetComponent<PuzzlePiece>().Number;
         }
 
-        var states = new List<int[,]> {_goal};
-        states.AddRange(Solver.Solve(pieces, _goal, _puzzleType));
+        var solution = Solver.Solve(pieces, _goal, _puzzleType);
         
         _board.gameObject.SetActive(false);
         _buttons.gameObject.SetActive(false);
         _solveButton.gameObject.SetActive(false);
+        
         _viewManager.SetActive(true);
         _viewManager.SetSize(_boardSize);
-        _viewManager.SetStates(states);
+        _viewManager.SetStates(solution.States);
+        
+        _resultManager.SetActive(true);
+        _resultManager.SetMoveCount(solution.Moves);
+        _resultManager.SetElapsedTime(solution.Time);
+        _resultManager.SetVisitedCount(solution.Visited);
+        _resultManager.SetHashSize(solution.HashSize);
     }
 
     private void Update()

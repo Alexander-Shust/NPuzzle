@@ -8,7 +8,7 @@ public static class Solver
     private static int[,] _goal;
     private static int _size;
 
-    public static List<int[,]> Solve(int[,] puzzle, int[,] goal, PuzzleType type)
+    public static Solution Solve(int[,] puzzle, int[,] goal, PuzzleType type)
     {
         var states = new List<int[,]>();
         _puzzle = (int[,]) puzzle.Clone();
@@ -30,21 +30,31 @@ public static class Solver
         var goalZeroX = type == PuzzleType.Soviet ? _size - 1 : _size / 2;
         var goalZeroY = type == PuzzleType.Soviet ? _size - 1 : _size / 2 + _size % 2 - 1;
         
-        var watch = new Stopwatch();
+        var timer = new Stopwatch();
         var start = new State(_size, puzzle, zeroX, zeroY, 0);
         var target = new State(_size, goal, goalZeroX, goalZeroY, 0);
         var search = new Search(start, target);
-                            
-
-        watch.Start();
+        
+        timer.Start();
         var final = search.Astar();
-        watch.Stop();
+        timer.Stop();
         
-        UnityEngine.Debug.LogError($"States visited {search.VisitedCount}");
-        UnityEngine.Debug.LogError($"Elapsed {watch.ElapsedMilliseconds} milliseconds");
-        UnityEngine.Debug.LogError($"Node at depth {final.Depth}");
-        
-        states.Add(final.Numbers);
-        return states;
+        var current = final;
+        while (current.String != start.String)
+        {
+            states.Add(current.Numbers);
+            current = current.Previous;
+        }
+        states.Add(start.Numbers);
+        states.Reverse();
+        var result = new Solution
+        {
+            States = states,
+            Moves = final.Depth,
+            Time = timer.ElapsedMilliseconds,
+            Visited = search.VisitedCount,
+            HashSize = search.HashSize
+        };
+        return result;
     }
 }

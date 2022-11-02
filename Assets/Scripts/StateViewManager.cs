@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using JetBrains.Annotations;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class StateViewManager : MonoBehaviour
 {
@@ -10,8 +11,13 @@ public class StateViewManager : MonoBehaviour
     [SerializeField]
     private StateDisplay _targetState;
 
-    private List<int[,]> _states;
+    [SerializeField]
+    private Button _previousButton;
 
+    [SerializeField]
+    private Button _nextButton;
+
+    private List<int[,]> _states;
     private int _currentIndex;
 
     private int CurrentIndex
@@ -33,6 +39,8 @@ public class StateViewManager : MonoBehaviour
     {
         _currentState.gameObject.SetActive(isActive);
         _targetState.gameObject.SetActive(isActive);
+        _previousButton.gameObject.SetActive(isActive);
+        _nextButton.gameObject.SetActive(isActive);
     }
 
     public void SetStates(List<int[,]> states)

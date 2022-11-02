@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using DataStructures.PriorityQueue;
 using Enums;
-using UnityEngine;
 
 public class Search
 {
     public int VisitedCount { get; set; }
+    public int HashSize => _hash.Count;
 
     private State _target;
     private PriorityQueue<State, int> _queue;
@@ -29,7 +29,6 @@ public class Search
             ++VisitedCount;
             if (state.String.Equals(_target.String))
             {
-                Debug.LogError(_hash.Count);
                 return state;
             }
 
@@ -50,7 +49,7 @@ public class Search
         {
             var numbers = (int[,]) state.Numbers.Clone();
             (numbers[x - 1, y], numbers[x, y]) = (numbers[x, y], numbers[x - 1, y]);
-            var newState = new State(size, numbers, x - 1, y, depth + 1);
+            var newState = new State(size, numbers, x - 1, y, depth + 1, state);
             AddState(newState);
         }
 
@@ -58,7 +57,7 @@ public class Search
         {
             var numbers = (int[,]) state.Numbers.Clone();
             (numbers[x + 1, y], numbers[x, y]) = (numbers[x, y], numbers[x + 1, y]);
-            var newState = new State(size, numbers, x + 1, y, depth + 1);
+            var newState = new State(size, numbers, x + 1, y, depth + 1, state);
             AddState(newState);
         }
 
@@ -66,7 +65,7 @@ public class Search
         {
             var numbers = (int[,]) state.Numbers.Clone();
             (numbers[x, y - 1], numbers[x, y]) = (numbers[x, y], numbers[x, y - 1]);
-            var newState = new State(size, numbers, x, y - 1, depth + 1);
+            var newState = new State(size, numbers, x, y - 1, depth + 1, state);
             AddState(newState);
         }
 
@@ -74,7 +73,7 @@ public class Search
         {
             var numbers = (int[,]) state.Numbers.Clone();
             (numbers[x, y + 1], numbers[x, y]) = (numbers[x, y], numbers[x, y + 1]);
-            var newState = new State(size, numbers, x, y + 1, depth + 1);
+            var newState = new State(size, numbers, x, y + 1, depth + 1, state);
             AddState(newState);
         }
     }

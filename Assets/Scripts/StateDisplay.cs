@@ -23,7 +23,7 @@ public class StateDisplay : MonoBehaviour
         }
     }
 
-    public void Clear()
+    private void Clear()
     {
         if (_numbers == null) return;
         

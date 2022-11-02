@@ -77,11 +77,7 @@ public class TestMain : MonoBehaviour
                             
 
         watch.Start();
-        var node = search.Astar();
+        // var node = search.Astar();
         watch.Stop();
-        
-        Debug.LogError($"States visited {search.VisitedCount}");
-        Debug.LogError($"Elapsed {watch.ElapsedMilliseconds} milliseconds");
-        Debug.LogError($"Node at depth {node.Depth}");
     }
 }
