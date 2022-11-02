@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using Enums;
 using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.UI;
@@ -5,11 +8,8 @@ using UnityEngine.UI;
 public class PuzzleManager : MonoBehaviour
 {
     [SerializeField]
-    private PuzzleType _puzzleType;
+    private SettingsManager _settingsManager;
 
-    [SerializeField]
-    private Solvable _solvable;
-    
     [SerializeField]
     private Transform _board;
 
@@ -24,13 +24,15 @@ public class PuzzleManager : MonoBehaviour
 
     [SerializeField]
     private GameObject _piecePrefab;
-    
-    [SerializeField]
-    private int _boardSize = 4;
 
     [SerializeField]
     private float _spacing = 0.1f;
-
+    
+    private PuzzleType _puzzleType;
+    
+    private int _boardSize = 3;
+    private Solvable _solvable = Solvable.Yes;
+    
     private float _boardWidth;
     private float _boardHeight;
     private float _pieceSize;
@@ -41,12 +43,7 @@ public class PuzzleManager : MonoBehaviour
 
     private void Awake()
     {
-        var boardLocalScale = _board.localScale;
-        _boardWidth = boardLocalScale.x;
-        _boardHeight = boardLocalScale.z;
         _pieces = new GameObject[_boardSize * _boardSize];
-        _solveButton.gameObject.SetActive(false);
-        _viewManager.SetSize(_boardSize);
     }
 
     private bool IsSolvable(int[,] pieces)
@@ -92,8 +89,6 @@ public class PuzzleManager : MonoBehaviour
 
         return errors % 2 == 0;
     }
-    
-    
 
     private void ClearBoard()
     {
@@ -114,12 +109,24 @@ public class PuzzleManager : MonoBehaviour
     public void InitBoard()
     {
         ClearBoard();
+        _settingsManager.UpdateSettings();
+        _boardSize = Settings.Size;
+        _puzzleType = Settings.Type;
+        _solvable = Settings.Solvable;
+        
+        var boardLocalScale = _board.localScale;
+        _boardWidth = boardLocalScale.x;
+        _boardHeight = boardLocalScale.z;
+        _pieces = new GameObject[_boardSize * _boardSize];
+        _solveButton.gameObject.SetActive(false);
+        
         var size = _boardSize;
         var pieces = PuzzleGenerator.Generate(size, _puzzleType, _solvable);
         _goal = _puzzleType switch
         {
             PuzzleType.Snail => PuzzleGenerator.GenerateSnailPosition(size),
-            _ => PuzzleGenerator.GenerateSovietPosition(size)
+            PuzzleType.Soviet => PuzzleGenerator.GenerateSovietPosition(size),
+            _ => throw new ArgumentOutOfRangeException()
         };
         _pieces = new GameObject[size * size];
         _pieceSize = (Mathf.Min(_boardWidth, _boardHeight) - _spacing * (size - 1)) / size;
@@ -172,13 +179,16 @@ public class PuzzleManager : MonoBehaviour
             var piece = _pieces[i];
             pieces[x, y] = piece == null ? 0 : piece.GetComponent<PuzzlePiece>().Number;
         }
-        var states = Solver.Solve(_boardSize, pieces, _goal);
-        Debug.LogError($"Solved in {states.Count - 1} moves");
+
+        var states = new List<int[,]> {_goal};
+        states.AddRange(Solver.Solve(pieces, _goal, _puzzleType));
         
         _board.gameObject.SetActive(false);
         _buttons.gameObject.SetActive(false);
         _solveButton.gameObject.SetActive(false);
         _viewManager.SetActive(true);
+        _viewManager.Clear();
+        _viewManager.SetSize(_boardSize);
         _viewManager.SetStates(states);
     }
 

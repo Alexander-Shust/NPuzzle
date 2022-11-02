@@ -4,8 +4,7 @@
     public int[,] Numbers { get; }
     public int ZeroX { get; }
     public int ZeroY { get; }
-    // public int Distance { get; set; }
-    public int Depth { get; set; }
+    public int Depth { get; }
     public string String { get; }
 
     public State(int size, int[,] numbers, int zeroX, int zeroY, int depth)

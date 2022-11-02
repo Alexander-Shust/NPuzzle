@@ -23,6 +23,16 @@ public class StateDisplay : MonoBehaviour
         }
     }
 
+    public void Clear()
+    {
+        if (_numbers == null) return;
+        
+        foreach (var number in _numbers)
+        {
+            Destroy(number.gameObject);
+        }
+    }
+
     public void SetSize(int size)
     {
         _size = size;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using DataStructures.PriorityQueue;
+using Enums;
 using UnityEngine;
 
 public class Search
@@ -89,11 +90,13 @@ public class Search
 
     private int GetHeuristicDistance(State state)
     {
-        var distance = 0;
-        // distance += ErrorCount(state);
-        distance += Manhattan(state);
-        distance += LineConflicts(state);
-        return distance;
+        return Settings.Heuristic switch
+        {
+            Heuristic.Misplaced => ErrorCount(state),
+            Heuristic.Manhattan => Manhattan(state),
+            Heuristic.LineConflicts => Manhattan(state) + LineConflicts(state),
+            _ => throw new ArgumentOutOfRangeException()
+        };
     }
 
     private int ErrorCount(State state)

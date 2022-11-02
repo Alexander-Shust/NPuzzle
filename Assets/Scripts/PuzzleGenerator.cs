@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Enums;
 using Random = UnityEngine.Random;
 
 public static class PuzzleGenerator
@@ -112,10 +113,4 @@ public static class PuzzleGenerator
 
         return puzzle;
     }
-}
-
-public enum PuzzleType
-{
-    Snail,
-    Soviet
 }
