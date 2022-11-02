@@ -187,7 +187,6 @@ public class PuzzleManager : MonoBehaviour
         _buttons.gameObject.SetActive(false);
         _solveButton.gameObject.SetActive(false);
         _viewManager.SetActive(true);
-        _viewManager.Clear();
         _viewManager.SetSize(_boardSize);
         _viewManager.SetStates(states);
     }

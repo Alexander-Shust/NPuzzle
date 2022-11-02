@@ -29,20 +29,25 @@ public class StateDisplay : MonoBehaviour
         
         foreach (var number in _numbers)
         {
-            Destroy(number.gameObject);
+            number.Destroy();
         }
+
+        _numbers = null;
     }
 
     public void SetSize(int size)
     {
+        Clear();
         _size = size;
-        var rect = _panel.rect;
-        var numberWidth = rect.width / size;
-        var numberHeight = rect.height / size;
+        var rect = (Vector2) _panel.position;
+        var numberWidth = 500.0f / _size;
+        var numberHeight = 500.0f / _size;
+        var startX = rect.x - 250.0f + numberWidth / 2;
+        var startY = rect.y - 250.0f - numberHeight / 2;
         _numbers = new List<NumberItem>();
         for (var i = 0; i < _size * _size; ++i)
         {
-            var position = new Vector2(i % _size * numberWidth, rect.height - i / size * numberHeight);
+            var position = new Vector2(startX + i % _size * numberWidth, startY + 500.0f - i / _size * numberHeight);
             var numberGo = Instantiate(_numberPrefab, position, Quaternion.identity, _panel);
             var numberItem = numberGo.GetComponent<NumberItem>();
             numberItem.SetSize(numberWidth, numberHeight);

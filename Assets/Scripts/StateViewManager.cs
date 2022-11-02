@@ -70,10 +70,4 @@ public class StateViewManager : MonoBehaviour
         _currentState.SetSize(size);
         _targetState.SetSize(size);
     }
-
-    public void Clear()
-    {
-        _currentState.Clear();
-        _targetState.Clear();
-    }
 }

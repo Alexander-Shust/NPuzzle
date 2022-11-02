@@ -18,4 +18,9 @@ public class NumberItem : MonoBehaviour
     {
         _rect.sizeDelta = new Vector2(width, height);
     }
+
+    public void Destroy()
+    {
+        Destroy(gameObject);
+    }
 }
