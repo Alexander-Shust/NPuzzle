@@ -31,8 +31,8 @@ public static class Solver
         var goalZeroY = type == PuzzleType.Soviet ? _size - 1 : _size / 2 + _size % 2 - 1;
         
         var timer = new Stopwatch();
-        var start = new State(_size, puzzle, zeroX, zeroY, 0);
-        var target = new State(_size, goal, goalZeroX, goalZeroY, 0);
+        var start = new State(_size, _puzzle, zeroX, zeroY, 0);
+        var target = new State(_size, _goal, goalZeroX, goalZeroY, 0);
         var search = new Search(start, target);
         
         timer.Start();

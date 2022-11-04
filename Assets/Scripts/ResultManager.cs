@@ -35,16 +35,16 @@ public class ResultManager : MonoBehaviour
 
     public void SetElapsedTime(long time)
     {
-        _elapsedTime.text = time.ToString();
+        _elapsedTime.text = time.ToString("N0");
     }
 
     public void SetVisitedCount(int count)
     {
-        _visitedCount.text = count.ToString();
+        _visitedCount.text = count.ToString("N0");
     }
 
     public void SetHashSize(int size)
     {
-        _hashSize.text = size.ToString();
+        _hashSize.text = size.ToString("N0");
     }
 }

@@ -2,6 +2,7 @@ using System;
 using Enums;
 using JetBrains.Annotations;
 using UnityEngine;
+using UnityEngine.PlayerLoop;
 using UnityEngine.UI;
 
 public class PuzzleManager : MonoBehaviour
@@ -19,6 +20,9 @@ public class PuzzleManager : MonoBehaviour
     private Button _solveButton;
 
     [SerializeField]
+    private Button _moveButton;
+
+    [SerializeField]
     private Transform _buttons;
 
     [SerializeField]
@@ -29,6 +33,9 @@ public class PuzzleManager : MonoBehaviour
 
     [SerializeField]
     private float _spacing = 0.1f;
+    
+    [SerializeField]
+    private float _moveSpeed = 2.0f;
     
     private PuzzleType _puzzleType;
     
@@ -42,6 +49,13 @@ public class PuzzleManager : MonoBehaviour
     private GameObject[] _pieces;
     private int _emptyPosition;
     private int[,] _goal;
+
+    private Solution _solution;
+    private int _solutionStep;
+    private bool _isFinished;
+    private bool _isMoving;
+    private Vector3 _targetPosition;
+    private Transform _movingTransform;
 
     private void Awake()
     {
@@ -104,8 +118,10 @@ public class PuzzleManager : MonoBehaviour
         _buttons.gameObject.SetActive(true);
         _board.gameObject.SetActive(true);
         _solveButton.gameObject.SetActive(false);
+        _moveButton.gameObject.SetActive(false);
         _viewManager.SetActive(false);
         _resultManager.SetActive(false);
+        _isFinished = false;
     } 
     
     [UsedImplicitly]
@@ -185,9 +201,13 @@ public class PuzzleManager : MonoBehaviour
 
         var solution = Solver.Solve(pieces, _goal, _puzzleType);
         
-        _board.gameObject.SetActive(false);
+        // _board.gameObject.SetActive(false);
         _buttons.gameObject.SetActive(false);
         _solveButton.gameObject.SetActive(false);
+        _moveButton.gameObject.SetActive(true);
+        _isFinished = true;
+        _solutionStep = 0;
+        _solution = solution;
         
         _viewManager.SetActive(true);
         _viewManager.SetSize(_boardSize);
@@ -202,38 +222,88 @@ public class PuzzleManager : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyUp(KeyCode.UpArrow))
+        if (!_isFinished)
         {
-            Up();
+            if (Input.GetKeyUp(KeyCode.UpArrow))
+            {
+                Up();
+            }
+            else if (Input.GetKeyUp(KeyCode.DownArrow))
+            {
+                Down();
+            }
+            else if (Input.GetKeyUp(KeyCode.LeftArrow))
+            {
+                Left();
+            }
+            else if (Input.GetKeyUp(KeyCode.RightArrow))
+            {
+                Right();
+            }
+            else if (Input.GetKeyUp(KeyCode.Return))
+            {
+                InitBoard();
+            }
         }
-        else if (Input.GetKeyUp(KeyCode.DownArrow))
+
+        if (_isFinished)
         {
-            Down();
+            if (++_solutionStep <= _solution.Moves)
+            {
+                var nextStep = _solution.States[_solutionStep];
+                var nextEmpty = _emptyPosition;
+                for (var i = 0; i < _boardSize * _boardSize; ++i)
+                {
+                    if (nextStep[i / _boardSize, i % _boardSize] == 0)
+                    {
+                        nextEmpty = i;
+                        break;
+                    }
+                }
+
+                var zeroX = _emptyPosition / _boardSize;
+                var zeroY = _emptyPosition % _boardSize;
+                Debug.LogError(nextEmpty);
+                _emptyPosition = nextEmpty;
+            }
+            else
+            {
+                _isFinished = false;
+            }
         }
-        else if (Input.GetKeyUp(KeyCode.LeftArrow))
+
+        if (!_isMoving) return;
+
+        var currentPosition = _movingTransform.position;
+        var direction = (_targetPosition - currentPosition).normalized;
+        currentPosition += direction * Time.deltaTime * _pieceSize * _moveSpeed;
+        if ((_targetPosition - currentPosition).magnitude < 0.01f)
         {
-            Left();
+            currentPosition = _targetPosition;
+            _isMoving = false;
         }
-        else if (Input.GetKeyUp(KeyCode.RightArrow))
-        {
-            Right();
-        }
-        else if (Input.GetKeyUp(KeyCode.Return))
-        {
-            InitBoard();
-        }
+
+        _movingTransform.position = currentPosition;
+    }
+
+    private void Move(Transform pieceTransform, Vector3 targetPosition)
+    {
+        _isMoving = true;
+        _movingTransform = pieceTransform;
+        _targetPosition = targetPosition;
     }
 
     [UsedImplicitly]
     public void Up()
     {
         var target = _emptyPosition - _boardSize;
-        if (target < 0) return;
+        if (_isMoving || target < 0) return;
         
         var pieceGo = _pieces[target];
         var position = pieceGo.transform.position;
         position.z -= _pieceSize + _spacing;
-        pieceGo.transform.position = position;
+        // pieceGo.transform.position = position;
+        Move(pieceGo.transform, position);
         SwapWithEmpty(target);
     }
 
@@ -241,25 +311,27 @@ public class PuzzleManager : MonoBehaviour
     public void Down()
     {
         var target = _emptyPosition + _boardSize;
-        if (target >= _boardSize * _boardSize) return;
+        if (_isMoving || target >= _boardSize * _boardSize) return;
         
         var pieceGo = _pieces[target];
         var position = pieceGo.transform.position;
         position.z += _pieceSize + _spacing;
-        pieceGo.transform.position = position;
+        Move(pieceGo.transform, position);
+        // pieceGo.transform.position = position;
         SwapWithEmpty(target);
     }
 
     [UsedImplicitly]
     public void Left()
     {
-        if (_emptyPosition % _boardSize == 0) return;
+        if (_isMoving || _emptyPosition % _boardSize == 0) return;
         var target = _emptyPosition - 1;
         
         var pieceGo = _pieces[target];
         var position = pieceGo.transform.position;
         position.x += _pieceSize + _spacing;
-        pieceGo.transform.position = position;
+        Move(pieceGo.transform, position);
+        // pieceGo.transform.position = position;
         SwapWithEmpty(target);
     }
 
@@ -267,12 +339,13 @@ public class PuzzleManager : MonoBehaviour
     public void Right()
     {
         var target = _emptyPosition + 1;
-        if (target % _boardSize == 0) return;
+        if (_isMoving || target % _boardSize == 0) return;
         
         var pieceGo = _pieces[target];
         var position = pieceGo.transform.position;
         position.x -= _pieceSize + _spacing;
-        pieceGo.transform.position = position;
+        Move(pieceGo.transform, position);
+        // pieceGo.transform.position = position;
         SwapWithEmpty(target);
     }
 
@@ -281,10 +354,10 @@ public class PuzzleManager : MonoBehaviour
         _pieces[_emptyPosition] = _pieces[target];
         _pieces[target] = null;
         _emptyPosition = target;
-        if (IsVictory())
-        {
-            Debug.LogError("Victory");
-        }
+        // if (IsVictory())
+        // {
+        //     Debug.LogError("Victory");
+        // }
     }
 
     private bool IsVictory()
