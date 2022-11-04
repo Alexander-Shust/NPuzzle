@@ -246,25 +246,44 @@ public class PuzzleManager : MonoBehaviour
             }
         }
 
-        if (_isFinished)
+        else if (!_isMoving)
         {
             if (++_solutionStep <= _solution.Moves)
             {
                 var nextStep = _solution.States[_solutionStep];
-                var nextEmpty = _emptyPosition;
+                var zeroX = _emptyPosition / _boardSize;
+                var zeroY = _emptyPosition % _boardSize;
+                var newZeroX = zeroX;
+                var newZeroY = zeroY;
                 for (var i = 0; i < _boardSize * _boardSize; ++i)
                 {
                     if (nextStep[i / _boardSize, i % _boardSize] == 0)
                     {
-                        nextEmpty = i;
+                        newZeroX = i / _boardSize;
+                        newZeroY = i % _boardSize;
                         break;
                     }
                 }
 
-                var zeroX = _emptyPosition / _boardSize;
-                var zeroY = _emptyPosition % _boardSize;
-                Debug.LogError(nextEmpty);
-                _emptyPosition = nextEmpty;
+                if (newZeroX == zeroX)
+                {
+                    if (newZeroY > zeroY)
+                    {
+                        Right();
+                    }
+                    else
+                    {
+                        Left();
+                    }
+                }
+                else if (newZeroX > zeroX)
+                {
+                    Down();
+                }
+                else
+                {
+                    Up();
+                }
             }
             else
             {
@@ -276,7 +295,7 @@ public class PuzzleManager : MonoBehaviour
 
         var currentPosition = _movingTransform.position;
         var direction = (_targetPosition - currentPosition).normalized;
-        currentPosition += direction * Time.deltaTime * _pieceSize * _moveSpeed;
+        currentPosition += direction * (Time.deltaTime * _pieceSize * _moveSpeed);
         if ((_targetPosition - currentPosition).magnitude < 0.01f)
         {
             currentPosition = _targetPosition;
@@ -302,7 +321,6 @@ public class PuzzleManager : MonoBehaviour
         var pieceGo = _pieces[target];
         var position = pieceGo.transform.position;
         position.z -= _pieceSize + _spacing;
-        // pieceGo.transform.position = position;
         Move(pieceGo.transform, position);
         SwapWithEmpty(target);
     }
@@ -317,7 +335,6 @@ public class PuzzleManager : MonoBehaviour
         var position = pieceGo.transform.position;
         position.z += _pieceSize + _spacing;
         Move(pieceGo.transform, position);
-        // pieceGo.transform.position = position;
         SwapWithEmpty(target);
     }
 
@@ -331,7 +348,6 @@ public class PuzzleManager : MonoBehaviour
         var position = pieceGo.transform.position;
         position.x += _pieceSize + _spacing;
         Move(pieceGo.transform, position);
-        // pieceGo.transform.position = position;
         SwapWithEmpty(target);
     }
 
@@ -345,7 +361,6 @@ public class PuzzleManager : MonoBehaviour
         var position = pieceGo.transform.position;
         position.x -= _pieceSize + _spacing;
         Move(pieceGo.transform, position);
-        // pieceGo.transform.position = position;
         SwapWithEmpty(target);
     }
 
@@ -354,10 +369,6 @@ public class PuzzleManager : MonoBehaviour
         _pieces[_emptyPosition] = _pieces[target];
         _pieces[target] = null;
         _emptyPosition = target;
-        // if (IsVictory())
-        // {
-        //     Debug.LogError("Victory");
-        // }
     }
 
     private bool IsVictory()
