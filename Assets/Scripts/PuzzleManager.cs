@@ -1,8 +1,10 @@
 using System;
+using System.IO;
+using System.Text.RegularExpressions;
 using Enums;
 using JetBrains.Annotations;
+using UnityEditor;
 using UnityEngine;
-using UnityEngine.PlayerLoop;
 using UnityEngine.UI;
 
 public class PuzzleManager : MonoBehaviour
@@ -53,6 +55,7 @@ public class PuzzleManager : MonoBehaviour
     private Solution _solution;
     private int _solutionStep;
     private bool _isFinished;
+    private bool _isActive;
     private bool _isMoving;
     private Vector3 _targetPosition;
     private Transform _movingTransform;
@@ -60,6 +63,11 @@ public class PuzzleManager : MonoBehaviour
     private void Awake()
     {
         _pieces = new GameObject[_boardSize * _boardSize];
+        var boardLocalScale = _board.localScale;
+        _boardWidth = boardLocalScale.x;
+        _boardHeight = boardLocalScale.z;
+        _solveButton.gameObject.SetActive(false);
+        _moveButton.gameObject.SetActive(false);
     }
 
     private bool IsSolvable(int[,] pieces)
@@ -133,12 +141,6 @@ public class PuzzleManager : MonoBehaviour
         _puzzleType = Settings.Type;
         _solvable = Settings.Solvable;
         
-        var boardLocalScale = _board.localScale;
-        _boardWidth = boardLocalScale.x;
-        _boardHeight = boardLocalScale.z;
-        _pieces = new GameObject[_boardSize * _boardSize];
-        _solveButton.gameObject.SetActive(false);
-        
         var size = _boardSize;
         var pieces = PuzzleGenerator.Generate(size, _puzzleType, _solvable);
         _goal = _puzzleType switch
@@ -147,6 +149,11 @@ public class PuzzleManager : MonoBehaviour
             PuzzleType.Soviet => PuzzleGenerator.GenerateSovietPosition(size),
             _ => throw new ArgumentOutOfRangeException()
         };
+        CreatePieces(size, pieces);
+    }
+
+    private void CreatePieces(int size, int[,] pieces)
+    {
         _pieces = new GameObject[size * size];
         _pieceSize = (Mathf.Min(_boardWidth, _boardHeight) - _spacing * (size - 1)) / size;
         var fontSize = 36 / size;
@@ -201,7 +208,7 @@ public class PuzzleManager : MonoBehaviour
 
         var solution = Solver.Solve(pieces, _goal, _puzzleType);
         
-        // _board.gameObject.SetActive(false);
+        _board.gameObject.SetActive(false);
         _buttons.gameObject.SetActive(false);
         _solveButton.gameObject.SetActive(false);
         _moveButton.gameObject.SetActive(true);
@@ -246,7 +253,7 @@ public class PuzzleManager : MonoBehaviour
             }
         }
 
-        else if (!_isMoving)
+        else if (!_isMoving && _isActive)
         {
             if (++_solutionStep <= _solution.Moves)
             {
@@ -288,6 +295,7 @@ public class PuzzleManager : MonoBehaviour
             else
             {
                 _isFinished = false;
+                _isActive = false;
             }
         }
 
@@ -369,6 +377,79 @@ public class PuzzleManager : MonoBehaviour
         _pieces[_emptyPosition] = _pieces[target];
         _pieces[target] = null;
         _emptyPosition = target;
+    }
+
+    [UsedImplicitly]
+    public void DisplaySolution()
+    {
+        _board.gameObject.SetActive(true);
+        _viewManager.SetActive(false);
+        _moveButton.gameObject.SetActive(false);
+        _isActive = true;
+    }
+
+    [UsedImplicitly]
+    public void LoadFile()
+    {
+        var filePath = EditorUtility.OpenFilePanel("Select File", "C:\\Puzzles", "txt");
+        var lines = File.ReadAllLines(filePath);
+        var sizeLineNumber = -1;
+        var size = 0;
+        for (var i = 0; i < lines.Length; ++i)
+        {
+            var line = lines[i];
+            if (line == string.Empty || line[0] == '#') continue;
+            
+            var content = line.Split('#')[0];
+            var numbers = content.Split(' ');
+            if (numbers.Length == 1)
+            {
+                if (int.TryParse(numbers[0], out size))
+                {
+                    sizeLineNumber = i;
+                    break;
+                }
+            }
+        }
+
+        if (sizeLineNumber == -1) return;
+        var puzzle = new int[size, size];
+        var filledLines = 0;
+        for (var i = sizeLineNumber + 1; i < lines.Length; ++i)
+        {
+            var line = lines[i];
+            if (line == string.Empty || line[0] == '#') continue;
+            
+            var content = Regex.Replace(line.Split('#')[0], "\\s+", " ");
+            var numbers = content.Trim(' ').Split(' ');
+            if (numbers.Length == size)
+            {
+                for (var j = 0; j < size; ++j)
+                {
+                    if (int.TryParse(numbers[j], out var number))
+                    {
+                        puzzle[filledLines, j] = number;
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+
+                ++filledLines;
+            }
+            else
+            {
+                return;
+            }
+        }
+
+        if (filledLines != size) return;
+        
+        ClearBoard();
+        _boardSize = size;
+        _goal = PuzzleGenerator.GenerateSnailPosition(size);
+        CreatePieces(size, puzzle);
     }
 
     private bool IsVictory()
