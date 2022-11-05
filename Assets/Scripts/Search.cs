@@ -17,7 +17,7 @@ public class Search
         _queue = new PriorityQueue<State, int>(0);
         _target = target;
         _hash = new HashSet<string>();
-        _queue.Insert(start, 3);
+        _queue.Insert(start, 0);
     }
 
     public State Astar()

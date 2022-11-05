@@ -3,6 +3,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using Enums;
 using JetBrains.Annotations;
+using TMPro;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
@@ -26,6 +27,9 @@ public class PuzzleManager : MonoBehaviour
 
     [SerializeField]
     private Transform _buttons;
+
+    [SerializeField]
+    private TMP_Text _unsolvable;
 
     [SerializeField]
     private StateViewManager _viewManager;
@@ -68,6 +72,7 @@ public class PuzzleManager : MonoBehaviour
         _boardHeight = boardLocalScale.z;
         _solveButton.gameObject.SetActive(false);
         _moveButton.gameObject.SetActive(false);
+        _unsolvable.gameObject.SetActive(false);
     }
 
     private bool IsSolvable(int[,] pieces)
@@ -127,6 +132,7 @@ public class PuzzleManager : MonoBehaviour
         _board.gameObject.SetActive(true);
         _solveButton.gameObject.SetActive(false);
         _moveButton.gameObject.SetActive(false);
+        _unsolvable.gameObject.SetActive(false);
         _viewManager.SetActive(false);
         _resultManager.SetActive(false);
         _isFinished = false;
@@ -190,7 +196,7 @@ public class PuzzleManager : MonoBehaviour
         }
         else
         {
-            Debug.LogError("Unsolvable");
+            _unsolvable.gameObject.SetActive(true);
         }
     }
 
@@ -391,7 +397,7 @@ public class PuzzleManager : MonoBehaviour
     [UsedImplicitly]
     public void LoadFile()
     {
-        var filePath = EditorUtility.OpenFilePanel("Select File", "C:\\Puzzles", "txt");
+        var filePath = EditorUtility.OpenFilePanel("Select File", @"C:\DU\NPuzzle\Puzzles", "txt");
         var lines = File.ReadAllLines(filePath);
         var sizeLineNumber = -1;
         var size = 0;
@@ -448,25 +454,14 @@ public class PuzzleManager : MonoBehaviour
         
         ClearBoard();
         _boardSize = size;
-        _goal = PuzzleGenerator.GenerateSnailPosition(size);
-        CreatePieces(size, puzzle);
-    }
-
-    private bool IsVictory()
-    {
-        for (var i = 0; i < _boardSize * _boardSize; ++i)
+        _settingsManager.UpdateSettings();
+        _puzzleType = Settings.Type;
+        _goal = _puzzleType switch
         {
-            var x = i / _boardSize;
-            var y = i % _boardSize;
-            if (_pieces[i] == null)
-            {
-                if (_goal[x, y] == 0) continue;
-                return false;
-            }
-            var piece = _pieces[i].GetComponent<PuzzlePiece>();
-            
-            if (piece.Number != _goal[x, y]) return false;
-        }
-        return true;
+            PuzzleType.Snail => PuzzleGenerator.GenerateSnailPosition(size),
+            PuzzleType.Soviet => PuzzleGenerator.GenerateSovietPosition(size),
+            _ => throw new ArgumentOutOfRangeException()
+        };
+        CreatePieces(size, puzzle);
     }
 }
