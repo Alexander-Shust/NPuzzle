@@ -6,4 +6,5 @@ public static class Settings
     public static int Size = 3;
     public static Solvable Solvable = Solvable.Yes;
     public static PuzzleType Type = PuzzleType.Snail;
+    public static string PuzzleDirectory = @".\Puzzles";
 }

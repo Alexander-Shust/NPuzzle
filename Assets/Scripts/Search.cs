@@ -94,8 +94,28 @@ public class Search
             Heuristic.Misplaced => ErrorCount(state),
             Heuristic.Manhattan => Manhattan(state),
             Heuristic.LineConflicts => Manhattan(state) + LineConflicts(state),
+            Heuristic.PatternDb => PatternDb(state),
             _ => throw new ArgumentOutOfRangeException()
         };
+    }
+
+    private int PatternDb(State state)
+    {
+        if (state.Size != 4)
+        {
+            return Manhattan(state) + LineConflicts(state);
+        }
+
+        var singleArray = new int[16];
+        var numbers = state.Numbers;
+        for (var i = 0; i < 4; ++i)
+        {
+            for (var j = 0; j < 4; ++j)
+            {
+                singleArray[4 * i + j] = numbers[i, j];
+            }
+        }
+        return PatternManager.GetHeuristic(singleArray);
     }
 
     private int ErrorCount(State state)

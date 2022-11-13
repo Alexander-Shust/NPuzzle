@@ -73,6 +73,7 @@ public class PuzzleManager : MonoBehaviour
         _solveButton.gameObject.SetActive(false);
         _moveButton.gameObject.SetActive(false);
         _unsolvable.gameObject.SetActive(false);
+        PatternManager.LoadHeuristics();
     }
 
     private bool IsSolvable(int[,] pieces)
@@ -397,7 +398,7 @@ public class PuzzleManager : MonoBehaviour
     [UsedImplicitly]
     public void LoadFile()
     {
-        var filePath = EditorUtility.OpenFilePanel("Select File", @"C:\DU\NPuzzle\Puzzles", "txt");
+        var filePath = EditorUtility.OpenFilePanel("Select File", Settings.PuzzleDirectory, "txt");
         var lines = File.ReadAllLines(filePath);
         var sizeLineNumber = -1;
         var size = 0;

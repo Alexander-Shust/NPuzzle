@@ -4,6 +4,7 @@
     {
         Misplaced = 0,
         Manhattan = 1,
-        LineConflicts = 2
+        LineConflicts = 2,
+        PatternDb = 3
     }
 }
