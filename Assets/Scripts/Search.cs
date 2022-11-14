@@ -101,7 +101,7 @@ public class Search
 
     private int PatternDb(State state)
     {
-        if (state.Size != 4)
+        if (state.Size != 4 || Settings.Type != PuzzleType.Soviet)
         {
             return Manhattan(state) + LineConflicts(state);
         }
